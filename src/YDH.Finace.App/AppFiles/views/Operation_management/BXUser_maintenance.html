@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>报销人员维护</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+</head>
+<body>
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <script type="text/html" id="toolbarDemo">
+                <div class="layui-btn-container">
+                    <button class="layui-btn layui-btn-normal layui-btn-sm data-edit-btn" lay-event="add">添加</button>
+                </div>
+            </script>
+            <!--表格-->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div>
+    <script src="../../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+    <script src="../../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+    <script>
+        layui.use(['form', 'table', 'app'], function () {
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table,
+                layer = layui.layer,
+                laydate = layui.laydate;
+            var entity = new Object();
+
+            table.render({
+                method: "post",
+                contentType: "application/json;",
+                height: 620,
+                elem: '#currentTableId', //指定原始表格元素选择器（推荐id选择器）
+                url: '/api/Invoice/QueryBaoXiaoNameList',//数据接口
+                toolbar: '#toolbarDemo',//开启表格头部工具栏区域，该参数支持四种类型值：
+                defaultToolbar: ['filter', 'exports', 'print', { //该参数可自由配置头部工具栏右侧的图标按钮
+                    title: '提示',
+                    layEvent: 'LAYTABLE_TIPS',
+                    icon: 'layui-icon-tips'
+                }],
+                cols: [[  //表头
+                    { type: "checkbox", width: 40 },
+                    { type: "numbers", width: 400, title: '序号', align: 'center' },
+                    { field: 'id', width: 50, title: 'ID', hide: true },
+                    { field: 'bxName', minwidth: 130, title: '报销用户姓名', align: 'center', fixed: 'right' }
+                ]],
+                limits: [10, 15, 20, 25, 50, 100],//每页条数的选择项
+                limit: 15,//每页显示的条数
+                page: true //开启分页
+
+            });
+
+            //监听头部工具栏事件
+            table.on('toolbar(currentTableFilter)', function (obj) {
+                //手动添加
+                if (obj.event === 'add') {
+                    var index = layer.open({
+                        title: '添加报销用户',
+                        type: 2,
+                        shade: 0,
+                        // maxmin: true,
+                        shadeClose: true,
+                        area: ['30%', '30%'],
+                        content: 'add_BXInfo.html',//引用的弹出层的页面层的方式加载修改界面表单,
+                    });
+                }
+
+            })
+        })
+    </script>
+
+</body>
+</html>

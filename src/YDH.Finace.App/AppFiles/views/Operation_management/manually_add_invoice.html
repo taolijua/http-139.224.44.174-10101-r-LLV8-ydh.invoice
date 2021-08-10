@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>手动添加发票信息</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">发票代码</label>
+            <div class="layui-input-block">
+                <input type="text" name="invoiceCode"  autocomplete="off" lay-verify="required" lay-reqtext="发票代码不能为空" placeholder="请输入发票代码" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">发票号码</label>
+            <div class="layui-input-block">
+                <input type="text" name="invoiceNumber"  autocomplete="off"  lay-verify="required" lay-reqtext="发票号码不能为空" placeholder="请输入发票号码" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">发票校验码</label>
+            <div class="layui-input-block">
+                <input type="text" name="checkCode"  autocomplete="off" lay-verify="required" lay-reqtext="发票校验码不能为空" placeholder="请输入发票校验码" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">报销金额</label>
+            <div class="layui-input-block">
+                <input type="text" name="money"  autocomplete="off" lay-verify="required" lay-reqtext="报销金额不能为空" placeholder="请输入报销金额" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">开票日期</label>
+            <div class="layui-input-block">
+                <input type="text" name="invoiceDate" lay-verify="required" class="layui-input" id="test1" placeholder="yyyy-MM-dd">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">报销用户</label>
+            <div class="layui-input-block">
+                <select id="bxName" name="bxName" lay-verify="required">
+                    <option value="">请选择</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">报销公司名称</label>
+            <div class="layui-input-block">
+                <!--<input type="text" name="companyName" placeholder="请输入报销公司名称" value="" class="layui-input">-->
+                <select id="companyName" name="companyName" lay-verify="required">
+                    <option value="">请选择</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <input type="text" name="note"  autocomplete="off"  placeholder="请输入备注" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+    <script src="../../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+    <script src="../../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+    <script>
+        layui.use(['form', 'table', 'app'], function () {
+            var $ = layui.jquery,
+                form = layui.form,
+                layer = layui.layer,
+                laydate = layui.laydate;
+
+            //常规用法
+            laydate.render({
+                elem: '#test1'
+            });
+
+
+            var entity = new Object();
+            //entity.Page = 1;
+            //entity.limit = 15;
+            //获取报销人员信息
+            $.ajax({
+                //动态获取下拉选项的接口，返回数据主要是id+name
+                type: "post",
+                contentType: "application/json;",
+                url: '/api/Invoice/QueryBaoXiaoNameList',
+                // url: '/api/Invoice/QuerybxNameList',
+                data: JSON.stringify(entity),
+
+                success: function (data) {
+                    let str = "<option value=''>请选择</option>";
+                    for (let i of data.data) {
+                        //组装数据
+                        str += `<option value='${i.bxId}'>${i.bxName}</option>`;
+                    }
+                    //jquery赋值方式
+                    $("#bxName").html(str);
+                    //重新渲染生效
+                    form.render();
+                }
+            });
+            //获取报销公司信息（名称及纳税人识别号）
+            $.ajax({
+                //动态获取下拉选项的接口，返回数据主要是id+name
+                type: "post",
+                contentType: "application/json;",
+                url: '/api/Invoice/QueryCompanyList',
+                data: JSON.stringify(entity),
+
+                success: function (data) {
+                    let str = "<option value=''>请选择</option>";
+                    for (let i of data.data) {
+                        //组装数据
+                        str += `<option value='${i.companyId}'>${i.companyName}</option>`;
+                    }
+                    //jquery赋值方式
+                    $("#companyName").html(str);
+                    //重新渲染生效
+                    form.render();
+                }
+            });
+
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                var result = JSON.stringify(data.field);
+                var  obj = $.parseJSON(result);
+                var index; 
+                var Invoice = new Object();
+                Invoice.invoiceCode = obj.invoiceCode;
+                Invoice.invoiceNumber = obj.invoiceNumber;
+                Invoice.checkCode = obj.checkCode;
+                Invoice.money = obj.money;
+                Invoice.invoiceDate = obj.invoiceDate;
+                Invoice.bxId = obj.bxName;
+                Invoice.companyId = obj.companyName;
+                Invoice.note = obj.note;
+                $.ajax({
+                    type: "post",
+                    contentType: "application/json;",
+                    url: '/api/Invoice/SaveInvoiceInfo',
+                    data: JSON.stringify(Invoice),
+                    success: function (data) {
+                        if (data.code == 1) {
+                            index = layer.alert("已成功添加发票信息", {
+                                title: '添加发票信息成功'
+                            }, function () {
+                                // 关闭弹出层
+                                layer.close(index);
+                                //修改成功后刷新父界面
+                                window.parent.location.reload();
+                                var iframeIndex = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(iframeIndex);
+                            });
+                        }
+                        else if (data.code == 2) {
+                            index = layer.alert("发票信息保存失败，该发票已报销过，报销人员为" + JSON.stringify(data.dto.bxName), {
+                                title: '重复报销发票提示'
+                            }, function () {
+                                // 关闭弹出层
+                                layer.close(index);
+                                //修改成功后刷新父界面
+                                window.parent.location.reload();
+                                var iframeIndex = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(iframeIndex);
+                            });
+                        }   
+                        else {
+                            index = layer.alert("发票信息保存失败，失败原因：" + JSON.stringify(data.message), {
+                                title: '报销发票保存失败'
+                            }, function () {
+                                // 关闭弹出层
+                                layer.close(index);
+                                //修改成功后刷新父界面
+                                window.parent.location.reload();
+                                var iframeIndex = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(iframeIndex);
+                            });
+                        }
+                    }
+                })
+            });
+        })
+
+    </script>
+</body>
+</html>

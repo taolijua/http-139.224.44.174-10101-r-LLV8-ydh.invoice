@@ -1,0 +1,326 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>发票维护</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+</head>
+<body>
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <fieldset class="table-search-fieldset">
+                <legend>搜索信息</legend>
+                <div style="margin: 10px 10px 10px 10px" id="btn">
+                    <form class="layui-form layui-form-pane" action="">
+                        <div class="layui-form-item">
+
+                            <div class="layui-inline">
+
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">发票代码</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="invoiceCode" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label">发票号码</label>
+                                        <div class="layui-input-inline">
+
+                                            <input type="text" name="invoiceNumber" autocomplete="off" class="layui-input">
+                                        </div>
+                                    </div>
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label">开票日期</label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" name="InvoiceStarTime" class="layui-input" id="test1" placeholder="yyyy-MM-dd">
+                                        </div>
+                                        <div class="layui-form-mid">-</div>
+                                        <div class="layui-input-inline">
+                                            <input type="text" name="InvoiceEndTime" class="layui-input" id="test2" placeholder="yyyy-MM-dd">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label">报销人员</label>
+                                        <div class="layui-input-inline">
+                                            <select id="bxName" name="bxName" lay-verify="">
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label">录入人员</label>
+                                        <div class="layui-input-inline">
+                                            <select id="inputName" name="inputName" lay-verify="">
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label">录入日期</label>
+                                        <div class="layui-input-inline">
+                                            <input type="text" name="InputStarTime" class="layui-input" id="test3" placeholder="yyyy-MM-dd">
+                                        </div>
+                                        <div class="layui-form-mid">-</div>
+                                        <div class="layui-input-inline">
+                                            <input type="text" name="InputEndTime" class="layui-input" id="test4" placeholder="yyyy-MM-dd">
+                                        </div>
+                                    </div>
+
+                                    <div class="layui-inline">
+                                        <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索</button>
+                                    </div>
+                                </div>
+                            </div>
+                    </form>
+                </div>
+            </fieldset>
+            <!--表格头部工具栏-->
+            <script type="text/html" id="toolbarDemo">
+                <div class="layui-btn-container">
+                    <button class="layui-btn layui-btn-normal layui-btn-sm data-edit-btn" lay-event="manually_add"> 手动添加 </button>
+                    <button class="layui-btn layui-btn-normal layui-btn-sm data-edit-btn" lay-event="scan_add"> 扫描添加 </button>
+                    <button class="layui-btn layui-btn-normal layui-btn-sm data-edit-btn" lay-event="batch_check"> 批量导入查验结果</button>
+                    <button class="layui-btn layui-btn-normal layui-btn-sm data-edit-btn" lay-event="check"> 发票校验</button>
+                </div>
+            </script>
+            <!--表格-->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+            <script type="text/html" id="currentTableBar">
+                <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
+            </script>
+
+        </div>
+    </div>
+    <script src="../../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+    <script src="../../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+    <script>
+        layui.use(['form', 'table', 'app'], function () {
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table,
+               layer = layui.layer,
+             laydate = layui.laydate;
+
+
+            var entity = new Object();
+            //entity.Page = 1;
+            //entity.limit = 15;
+
+
+            //常规用法
+            laydate.render({
+                elem: '#test1'
+            });
+            laydate.render({
+                elem: '#test2'
+            });
+            laydate.render({
+                elem: '#test3'
+            });
+            laydate.render({
+                elem: '#test4'
+            });
+
+            $.ajax({
+                //动态获取下拉选项的接口，返回数据主要是id+name
+                type: "post",
+                contentType: "application/json;",
+                url: '/api/Invoice/QueryBaoXiaoNameList',
+               // url: '/api/Invoice/QuerybxNameList',
+               data: JSON.stringify(entity),
+
+                success: function (data) {
+                    let str = "<option value=''>全部</option>";
+                    for (let i of data.data) {
+                        //组装数据
+                        str += `<option value='${i.bxId}'>${i.bxName}</option>`;
+                    }
+                    //jquery赋值方式
+                    $("#bxName").html(str);
+                    //重新渲染生效
+                    form.render();
+                }
+            });
+            //获取录入人员
+            $.ajax({
+                type: "post",
+                contentType: "application/json;",
+                url: '/api/Invoice/QueryInputNameList',
+                data: JSON.stringify(entity),
+                success: function (data) {
+                    let str = "<option value=''>全部</option>";
+                    for (let i of data.data) {
+                        str += `<option value='${i.userId}'>${i.nickName}</option>`;
+                    }
+                   
+                    $("#inputName").html(str);
+                    form.render();
+                }
+            })
+
+
+            table.render({
+                method: "post",
+                contentType: "application/json;",
+                height: 620,
+                elem: '#currentTableId', //指定原始表格元素选择器（推荐id选择器）
+                url: '/api/Invoice/QueryInvoiceList',//数据接口
+                toolbar: '#toolbarDemo',//开启表格头部工具栏区域，该参数支持四种类型值：
+                defaultToolbar: ['filter', 'exports', 'print', { //该参数可自由配置头部工具栏右侧的图标按钮
+                    title: '提示',
+                    layEvent: 'LAYTABLE_TIPS',
+                    icon: 'layui-icon-tips'
+                }],
+                cols: [[  //表头
+                    { type: "checkbox", width: 40 },
+                    { type: "numbers", width: 50, title: '序号' },
+                    { field: 'id', width: 50, title: 'ID', hide: true },
+                    { field: 'invoiceCode', width: 130, title: '发票代码' },
+                    { field: 'invoiceNumber', width: 130, title: '发票号码'},
+                    { field: 'invoiceDate', width: 120, title: '开票日期', templet: "<div>{{layui.util.toDateString(d.invoiceDate, 'yyyy-MM-dd')}}</div>" },
+                    { field: 'checkCodeSix', width: 80, title: '校验码' },
+                    { field: 'money', width: 80, title: '金额' },
+                    { field: 'bxName', width: 100, title: '报销人员' },
+                    { field: 'inputTime', width: 120, title: '录入时间', templet: "<div>{{layui.util.toDateString(d.inputTime, 'yyyy-MM-dd')}}</div>"  },
+                    { field: 'nickName', width: 100, title: '录入人员 ' },
+                    { field: 'checkResult', width: 100, title: '校验结果 ' },
+                    { field: 'lastModifyBy', width: 120, title: '修改人员 ' },
+                    { field: 'lastModifyTime', width: 100, title: '修改时间 ' },
+                    { field: 'note', width: 80, title: '备注' },
+                    { field: 'identificationNumber', width: 150, title: '纳税人识别号' },
+                    { field: 'companyName', minwidth: 80, title: '报销单位名称', fixed: 'right' }
+                  
+                ]],
+                limits: [10, 15, 20, 25, 50, 100],//每页条数的选择项
+                limit: 15,//每页显示的条数
+                page: true //开启分页
+
+            });
+
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function (data) {
+                var result = JSON.stringify(data.field);
+                obj = $.parseJSON(result);
+                var dto_obj = new Object();
+                if ($.isEmptyObject(obj.invoiceCode) != true) { dto_obj.invoiceCode = obj.invoiceCode; }
+                if ($.isEmptyObject(obj.invoiceNumber) != true) { dto_obj.invoiceNumber = obj.invoiceNumber; }
+                if ($.isEmptyObject(obj.InvoiceStarTime) != true) { dto_obj.invoiceDateStar = obj.InvoiceStarTime; }
+                if ($.isEmptyObject(obj.InvoiceEndTime) != true) { dto_obj.invoiceDateEnd = obj.InvoiceEndTime; }
+                if ($.isEmptyObject(obj.bxName) != true) { dto_obj.bxId = obj.bxName; }
+                if ($.isEmptyObject(obj.inputName) != true) { dto_obj.inputId = obj.inputName; }
+                if ($.isEmptyObject(obj.InputStarTime) != true) { dto_obj.inputTimeStar = obj.InputStarTime; }
+                if ($.isEmptyObject(obj.InputEndTime) != true) { dto_obj.inputTimeEnd = obj.InputEndTime; }
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+
+                        Dto: dto_obj
+                    }
+
+                }, 'data');
+                return false;
+            });
+
+            //监听头部工具栏事件
+            table.on('toolbar(currentTableFilter)', function (obj) {
+                //手动添加
+                if (obj.event === 'manually_add') {
+                    var index = layer.open({
+                        title: '手动添加发票信息',
+                        type: 2,
+                        shade: 0,
+                        // maxmin: true,
+                        shadeClose: true,
+                        area: ['80%', '90%'],
+                        content: 'manually_add_invoice.html',//引用的弹出层的页面层的方式加载修改界面表单,
+                    });
+                }
+                else if (obj.event === 'scan_add') {
+                    var index = layer.open({
+                        title: '扫描添加发票信息',
+                        type: 2,
+                        shade: 0,
+                        // maxmin: true,
+                        shadeClose: true,
+                        area: ['80%', '80%'],
+                        content: 'scan_add_invoice.html',//引用的弹出层的页面层的方式加载修改界面表单,
+                    });
+                }
+                else if (obj.event == 'batch_check') {
+                    var index = layer.open({
+                        title: '查验真伪',
+                        type: 2,
+                        shade: 0,
+                        // maxmin: true,
+                        shadeClose: true,
+                        area: ['80%', '90%'],
+                        content: 'check.html',//引用的弹出层的页面层的方式加载修改界面表单,
+                    });
+                }
+                else if (obj.event == 'check') {
+                        var checkStatus = table.checkStatus('currentTableId');
+                        var data = obj.data;
+
+                        if (checkStatus.data.length == 0) {
+                            layer.alert("请先选中要查看的数据");
+                            return false;
+                        }
+                        else if (checkStatus.data.length > 1) {
+                            layer.alert("每次只能查看一条订单的信息");
+                            return false;
+                         }
+                    //动态向表传递赋值
+                    ckeck(obj, checkStatus);
+                }
+            })
+            //校验
+            function ckeck(obj, checkStatus) {
+                var chk = checkStatus.data[0];
+                var dto_obj = JSON.stringify(chk);
+                if ($.isEmptyObject(chk) != true) {
+                    dto_obj = $.parseJSON(dto_obj);
+                    console.log(dto_obj);
+                }
+
+                $.ajax({
+                    type: "post",
+                    contentType: "application/json",
+                    url: '/api/Invoice/CheckInvoiceList',
+                    data: JSON.stringify(dto_obj),
+                    success: function (msg) {
+                        if (msg.code == 1) {
+                            layer.alert("已更新校验结果");
+                        }
+                        table.reload('currentTableId', {
+                            page: {
+                                curr: 1
+                            }
+                            , where: {
+
+                                Dto: entity
+                            }
+
+                        }, 'data');
+                    }
+                })
+
+            }
+
+        })
+    </script>
+</body>
+</html>

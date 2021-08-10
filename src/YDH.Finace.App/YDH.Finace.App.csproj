@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>dc1089a5-dbdb-471b-92e8-5ed865f059dd</UserSecretsId>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>YDH.Port.App.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>YDH.Port.App.xml</DocumentationFile>
+  </PropertyGroup>
+	
+  <PropertyGroup>
+	<DebugType>embedded</DebugType>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\YDH.Finace.Business\YDH.Finace.Business.csproj" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <None Update="AppFiles\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+  
+</Project>

@@ -1,0 +1,31 @@
+﻿  <Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>D:\daima\open\src\YDH.Port.Business\YDH.Port.Business.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>D:\daima\customs\Port\src\YDH.Port.Business\YDH.Port.Business.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="RestSharp" Version="106.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YDH.Finace.DBContext\YDH.Finace.DBContext.csproj" />
+    <ProjectReference Include="..\YDH.Finace.Web\YDH.Finace.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="YDH.Finace.Business.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
